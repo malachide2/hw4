@@ -1,10 +1,9 @@
 #ifndef RECCHECK
 //if you want to add any #includes like <iostream> you must do them here (before the next endif)
-
+#include <algorithm>
 #endif
 
 #include "equal-paths.h"
-#include <algorithm>
 using namespace std;
 
 
