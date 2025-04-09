@@ -496,7 +496,7 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
   }
 
   // currNode is the parent of the new node
-  if (insertKey < currNode->getKey()) {
+  if (keyValuePair.first < currNode->getKey()) {
     currNode->setLeft(new Node<Key, Value>(keyValuePair.first, keyValuePair.second, currNode));
   }
   else {
