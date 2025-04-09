@@ -239,7 +239,7 @@ protected:
     Node<Key, Value>* internalFind(const Key& k) const; // TODO
     Node<Key, Value> *getSmallestNode() const;  // TODO
     static Node<Key, Value>* predecessor(Node<Key, Value>* current); // TODO
-    static Node<Key, Value>* successor(const Node<Key, Value>* current); // TODO
+    static Node<Key, Value>* successor(Node<Key, Value>* current); // TODO
     // Note:  static means these functions don't have a "this" pointer
     //        and instead just use the input argument.
 
@@ -363,6 +363,7 @@ typename BinarySearchTree<Key, Value>::iterator&
 BinarySearchTree<Key, Value>::iterator::operator++() {
   // TODO
   current_ = successor(current_);
+  return *this;
 }
 
 
@@ -477,17 +478,16 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
     return;
   }
 
-  Key& insertKey = keyValuePair.first;
   Node<Key, Value>* currNode = nullptr;
   Node<Key, Value>* nextNode = root_;
   while (nextNode != nullptr) {
     currNode = nextNode;
 
-    if (insertKey == currNode->getKey()) {
+    if (keyValuePair.first == currNode->getKey()) {
       currNode->setValue(keyValuePair.second);
       return;
     }
-    else if (insertKey < currNode->getKey()) {
+    else if (keyValuePair.first < currNode->getKey()) {
       nextNode = currNode->getLeft();
     }
     else {
@@ -585,7 +585,7 @@ BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current) {
 
 template<class Key, class Value>
 Node<Key, Value>*
-BinarySearchTree<Key, Value>::successor(const Node<Key, Value>* current) {
+BinarySearchTree<Key, Value>::successor(Node<Key, Value>* current) {
   // TODO
   if (current == nullptr)
     return nullptr;
