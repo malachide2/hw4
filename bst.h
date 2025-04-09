@@ -239,6 +239,7 @@ protected:
     Node<Key, Value>* internalFind(const Key& k) const; // TODO
     Node<Key, Value> *getSmallestNode() const;  // TODO
     static Node<Key, Value>* predecessor(Node<Key, Value>* current); // TODO
+    static Node<Key, Value>* successor(const Node<Key, Value>* current); // TODO
     // Note:  static means these functions don't have a "this" pointer
     //        and instead just use the input argument.
 
@@ -295,19 +296,18 @@ Begin implementations for the BinarySearchTree::iterator class.
 * Explicit constructor that initializes an iterator with a given node pointer.
 */
 template<class Key, class Value>
-BinarySearchTree<Key, Value>::iterator::iterator(Node<Key,Value> *ptr)
-{
-    // TODO
+BinarySearchTree<Key, Value>::iterator::iterator(Node<Key,Value> *ptr) {
+  // TODO
+  current_ = ptr;
 }
 
 /**
 * A default constructor that initializes the iterator to NULL.
 */
 template<class Key, class Value>
-BinarySearchTree<Key, Value>::iterator::iterator() 
-{
-    // TODO
-
+BinarySearchTree<Key, Value>::iterator::iterator() {
+  // TODO
+  current_ = nullptr;
 }
 
 /**
@@ -337,9 +337,9 @@ BinarySearchTree<Key, Value>::iterator::operator->() const
 template<class Key, class Value>
 bool
 BinarySearchTree<Key, Value>::iterator::operator==(
-    const BinarySearchTree<Key, Value>::iterator& rhs) const
-{
-    // TODO
+  const BinarySearchTree<Key, Value>::iterator& rhs) const {
+  // TODO
+  return current_ == rhs.current_;
 }
 
 /**
@@ -349,10 +349,9 @@ BinarySearchTree<Key, Value>::iterator::operator==(
 template<class Key, class Value>
 bool
 BinarySearchTree<Key, Value>::iterator::operator!=(
-    const BinarySearchTree<Key, Value>::iterator& rhs) const
-{
-    // TODO
-
+  const BinarySearchTree<Key, Value>::iterator& rhs) const {
+  // TODO
+  return current_ != rhs.current_;
 }
 
 
@@ -361,10 +360,9 @@ BinarySearchTree<Key, Value>::iterator::operator!=(
 */
 template<class Key, class Value>
 typename BinarySearchTree<Key, Value>::iterator&
-BinarySearchTree<Key, Value>::iterator::operator++()
-{
-    // TODO
-
+BinarySearchTree<Key, Value>::iterator::operator++() {
+  // TODO
+  current_ = successor(current_);
 }
 
 
@@ -559,9 +557,58 @@ void BinarySearchTree<Key, Value>::remove(const Key& key) {
 
 template<class Key, class Value>
 Node<Key, Value>*
-BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current)
-{
-    // TODO
+BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current) {
+  // TODO
+  if (current == nullptr)
+    return nullptr;
+
+  if (current->getLeft() != nullptr) {
+    Node<Key, Value>* currNode = current->getLeft();
+    while (currNode->getRight() != nullptr) {
+      currNode = currNode->getRight();
+    }
+    return currNode;
+  }
+  else {
+    Node<Key, Value>* currNode = current;
+    while (currNode->getParent() != nullptr && currNode->getParent()->getRight() != currNode) {
+      currNode = currNode->getParent();
+    }
+    if (currNode->getParent() == nullptr) {
+      return currNode;
+    }
+    else {
+      return currNode->getParent();
+    }
+  }
+}
+
+template<class Key, class Value>
+Node<Key, Value>*
+BinarySearchTree<Key, Value>::successor(const Node<Key, Value>* current) {
+  // TODO
+  if (current == nullptr)
+    return nullptr;
+
+  if (current->getRight() != nullptr) {
+    Node<Key, Value>* currNode = current->getRight();
+    while (currNode->getLeft() != nullptr) {
+      currNode = currNode->getLeft();
+    }
+    return currNode;
+  }
+  else {
+    Node<Key, Value>* currNode = current;
+    while (currNode->getParent() != nullptr && currNode->getParent()->getLeft() != currNode) {
+      currNode = currNode->getParent();
+    }
+    if (currNode->getParent() == nullptr) {
+      return currNode;
+    }
+    else {
+      return currNode->getParent();
+    }
+  }
 }
 
 
