@@ -149,7 +149,7 @@ template<class Key, class Value>
 void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
   // TODO
   // Step 1: Check if the key already exists
-  Node<Key, Value>* originalNode = internalFind(new_item.first);
+  Node<Key, Value>* originalNode = this->internalFind(new_item.first);
   if (originalNode != nullptr) {
       originalNode->setValue(new_item.second);
       return;
@@ -218,7 +218,7 @@ void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
 template<class Key, class Value>
 void AVLTree<Key, Value>::remove(const Key& key) {
   // TODO
-  AVLNode<Key, Value>* currNode = static_cast<AVLNode<Key, Value>*>(internalFind(key));
+  AVLNode<Key, Value>* currNode = static_cast<AVLNode<Key, Value>*>(this->internalFind(key));
     if (currNode == nullptr) {
         return; // Key not found
     }
@@ -228,7 +228,7 @@ void AVLTree<Key, Value>::remove(const Key& key) {
 
     // Case 1: Node has two children
     if (currNode->getLeft() != nullptr && currNode->getRight() != nullptr) {
-        AVLNode<Key, Value>* pred = static_cast<AVLNode<Key, Value>*>(predecessor(currNode));
+        AVLNode<Key, Value>* pred = static_cast<AVLNode<Key, Value>*>(this->predecessor(currNode));
         nodeSwap(currNode, pred);
         parentNode = currNode->getParent(); // Update parent after swap
     }
