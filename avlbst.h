@@ -148,19 +148,20 @@ protected:
 template<class Key, class Value>
 void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
   // TODO
-  AVLNode<Key, Value>* currNode = static_cast<AVLNode<Key, Value>*>(this->internalFind(new_item.first));
+  AVLNode<Key, Value>* currNode = static_cast<AVLNode<Key, Value>*>(this->internalFind(key));
     if (currNode == nullptr) {
         return; // Key not found
     }
 
     AVLNode<Key, Value>* parentNode = currNode->getParent();
-    bool balanceChanged = false;
+    bool isLeftChild = (parentNode != nullptr && currNode == parentNode->getLeft());
 
     // Case 1: Node has two children
     if (currNode->getLeft() != nullptr && currNode->getRight() != nullptr) {
         AVLNode<Key, Value>* pred = static_cast<AVLNode<Key, Value>*>(this->predecessor(currNode));
         nodeSwap(currNode, pred);
-        parentNode = currNode->getParent(); // Update parent after swap
+        parentNode = currNode->getParent();
+        isLeftChild = (parentNode != nullptr && currNode == parentNode->getLeft());
     }
 
     // Case 2: Node has one or zero children
@@ -171,18 +172,13 @@ void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
             child->setParent(nullptr);
         }
     } else {
-        if (currNode == parentNode->getLeft()) {
+        if (isLeftChild) {
             parentNode->setLeft(child);
-            if (child != nullptr) {
-                child->setParent(parentNode);
-            }
-            balanceChanged = true;
         } else {
             parentNode->setRight(child);
-            if (child != nullptr) {
-                child->setParent(parentNode);
-            }
-            balanceChanged = true;
+        }
+        if (child != nullptr) {
+            child->setParent(parentNode);
         }
     }
 
@@ -190,13 +186,11 @@ void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
 
     // Step 3: Update balances and perform rotations
     AVLNode<Key, Value>* curr = parentNode;
-    while (curr != nullptr && balanceChanged) {
-        int8_t oldBalance = curr->getBalance();
-
-        if (child == curr->getLeft()) {
-            curr->updateBalance(1);
+    while (curr != nullptr) {
+        if (isLeftChild) {
+            curr->updateBalance(1); // Removing from left increases balance
         } else {
-            curr->updateBalance(-1);
+            curr->updateBalance(-1); // Removing from right decreases balance
         }
 
         if (curr->getBalance() == 2) {
@@ -213,11 +207,11 @@ void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
             rightRotation(curr);
         }
 
-        if (curr->getBalance() != 0 || oldBalance == 0) {
-            break; // Stop if balance is restored or no further changes are needed
+        if (curr->getBalance() != 0) {
+            break; // Stop if balance is restored
         }
 
-        child = curr;
+        isLeftChild = (curr->getParent() != nullptr && curr == curr->getParent()->getLeft());
         curr = curr->getParent();
     }
 }
