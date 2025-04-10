@@ -575,7 +575,7 @@ BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current) {
       currNode = currNode->getParent();
     }
     if (currNode->getParent() == nullptr) {
-      return currNode;
+      return (currNode->getKey() < current->getKey()) ? currNode : nullptr;
     }
     else {
       return currNode->getParent();
@@ -603,7 +603,7 @@ BinarySearchTree<Key, Value>::successor(Node<Key, Value>* current) {
       currNode = currNode->getParent();
     }
     if (currNode->getParent() == nullptr) {
-      return currNode;
+      return (currNode->getKey() > current->getKey()) ? currNode : nullptr;
     }
     else {
       return currNode->getParent();
