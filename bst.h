@@ -624,7 +624,7 @@ void BinarySearchTree<Key, Value>::clear() {
     node->setParent(nullptr);
     delete node;
   });
-  root_ = nullptr;
+  // root_ = nullptr;
 }
 
 
