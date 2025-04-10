@@ -137,8 +137,7 @@ protected:
     virtual void nodeSwap( AVLNode<Key,Value>* n1, AVLNode<Key,Value>* n2);
 
     // Add helper functions here
-
-
+    
 };
 
 /*
@@ -146,9 +145,9 @@ protected:
  * overwrite the current value with the updated value.
  */
 template<class Key, class Value>
-void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
-{
-    // TODO
+void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
+  // TODO
+  BinarySearchTree<Key, Value>::insert(new_item);
 }
 
 /*
@@ -156,9 +155,9 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
  * should swap with the predecessor and then remove.
  */
 template<class Key, class Value>
-void AVLTree<Key, Value>:: remove(const Key& key)
-{
-    // TODO
+void AVLTree<Key, Value>:: remove(const Key& key) {
+  // TODO
+  BinarySearchTree<Key, Value>::remove(key);
 }
 
 template<class Key, class Value>
