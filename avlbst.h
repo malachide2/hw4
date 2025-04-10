@@ -131,7 +131,7 @@ template <class Key, class Value>
 class AVLTree : public BinarySearchTree<Key, Value>
 {
 public:
-    virtual void insert (const std::pair<const Key, Value> &new_item); // TODO
+    virtual void insert(const std::pair<const Key, Value> &new_item); // TODO
     virtual void remove(const Key& key);  // TODO
 protected:
     virtual void nodeSwap( AVLNode<Key,Value>* n1, AVLNode<Key,Value>* n2);
@@ -148,65 +148,47 @@ protected:
 template<class Key, class Value>
 void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
   // TODO
-  if (root_ == nullptr) {
-    root_ = new AVLNode<Key, Value>(new_item.first, new_item.second, nullptr);
+  Node<Key, Value>* originalNode = internalFind(new_item.first);
+  if (originalNode != nullptr) {
+    originalNode->setValue(new_item.second);
     return;
   }
 
-  AVLNode<Key, Value>* currNode = nullptr;
-  AVLNode<Key, Value>* nextNode = root_;
-  while (nextNode != nullptr) {
-    currNode = nextNode;
-
-    if (new_item.first == currNode->getKey()) {
-      currNode->setValue(new_item.second);
-      return;
-    }
-    else if (new_item.first < currNode->getKey()) {
-      nextNode = currNode->getLeft();
+  BinarySearchTree<Key, Value>::insert(new_item);
+  Node<Key, Value>* insertedNode = internalFind(new_item.first);
+  AVLNode<Key, Value>* currNode = static_cast<AVLNode<Key, Value>*>(insertedNode);
+  AVLNode<Key, Value>* parentNode = currNode->getParent();
+  while (parentNode != nullptr) {
+    if (currNode == parentNode->getLeft()) {
+      parentNode->updateBalance(-1);
     }
     else {
-      nextNode = currNode->getRight();
-    }
-  }
-
-  AVLNode<Key, Value>* insertedNode = new AVLNode<Key, Value>(new_item.first, new_item.second, parent);
-  if (new_item.first < parent->getKey()) {
-    parent->setLeft(insertedNode);
-  } else {
-    parent->setRight(insertedNode);
-  }
-
-  currNode = insertedNode->getParent();
-  while (currNode != nullptr) {
-    int oldBalance = currNode->getBalance();
-    if (newNode == currNode->getLeft()) {
-      currNode->setBalance(currNode->getBalance() - 1);
-    } else {
-      currNode->setBalance(currNode->getBalance() + 1);
+      parentNode->updateBalance(1);
     }
 
-    if (currNode->getBalance() == 0) {
+    if (parentNode->getBalance() == 0) {
       break;
     }
-    else if (currNode->getBalance() == -1 || currNode->getBalance() == 1) {
-      insertedNode = currNode;
-      currNode = currNode->getParent();
-    }
-    else {
-      if (currNode->getBalance() == -2) {
-        if (insertedNode->getBalance() == 1) {
-          leftRotation(insertedNode);
-        }
-        rightRotation(currNode);
-      } else if (currNode->getBalance() == 2) {
-        if (insertedNode->getBalance() == -1) {
-          rightRotation(insertedNode);
-        }
+    else if (parentNode->getBalance() == -2) {
+      if (currNode->getBalance() == 1) {
+        // Left-Right Zig-Zag
         leftRotation(currNode);
       }
+      rightRotation(parentNode);
       break;
     }
+    else if (parentNode->getBalance() == 2) {
+      // Right-heavy
+      if (currNode->getBalance() == -1) {
+        // Right-Left Zig-Zag
+        rightRotation(currNode);
+      }
+      leftRotation(parentNode);
+      break;
+    }
+
+    currNode = parentNode;
+    parentNode = parentNode->getParent();
   }
 }
 
@@ -217,65 +199,43 @@ void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
 template<class Key, class Value>
 void AVLTree<Key, Value>::remove(const Key& key) {
   // TODO
-  AVLNode<Key, Value>* currNode = internalFind(key);
-
+  AVLNode<Key, Value>* currNode = static_cast<AVLNode<Key, Value>*>(internalFind(key));
   if (currNode == nullptr)
     return;
 
-  // 2 Children
-  if (currNode->getLeft() != nullptr && currNode->getRight() != nullptr) {
-    nodeSwap(currNode, predecessor(currNode));
-  }
+  AVLNode<Key, Value>* parentNode = currNode->getParent();
+  bool isLeftChild = (parentNode != nullptr && currNode == parentNode->getLeft());
 
-  Node<Key, Value>* parentNode = currNode->getParent();
-  bool balanceChanged = false;
-  // 0 Children (Leaf Node)
-  if (currNode->getLeft() == nullptr && currNode->getRight() == nullptr) {
-    if (currNode == parentNode->getLeft()) {
-      parentNode->setLeft(nullptr);
-      if (parentNode->getRight() == nullptr)
-        balanceChanged = true;
-    }
-    else {
-      parentNode->setRight(nullptr);
-      if (parentNode->getLeft() == nullptr)
-        balanceChanged = true;
-    }
-    delete currNode;
-  }
-  // 1 Child (Left)
-  else if (currNode->getRight() == nullptr) {
-    balanceChanged = true;
-    if (currNode == parentNode->getLeft()) {
-      parentNode->setLeft(currNode->getLeft());
-    }
-    else {
-      parentNode->setRight(currNode->getLeft());
-    }
-    delete currNode;
-  }
-  // 1 Child (Right)
-  else {
-    balanceChanged = true;
-    if (currNode == parentNode->getLeft()) {
-      parentNode->setLeft(currNode->getRight());
-    }
-    else {
-      parentNode->setRight(currNode->getRight());
-    }
-    delete currNode;
-  }
+  BinarySearchTree<Key, Value>::remove(key);
 
-  currNode = root_;
-  while (currNode != nullptr) {
-    if (key < currNode->getKey()) {
-      currNode->setBalance(currNode->getBalance() - 1);
-      currNode = currNode->getLeft();
+  while (parentNode != nullptr) {
+    if (isLeftChild) {
+      parentNode->updateBalance(1);
+    } else {
+      parentNode->updateBalance(-1);
     }
-    else {
-      currNode->setBalance(currNode->getBalance() + 1);
-      currNode = currNode->getRight();
+
+    if (parentNode->getBalance() == 2) {
+      AVLNode<Key, Value>* rightChild = parentNode->getRight();
+      if (rightChild->getBalance() == -1) {
+        // Right-Left Zig-Zag
+        rightRotation(rightChild);
+      }
+      leftRotation(parentNode);
+    } else if (parentNode->getBalance() == -2) {
+      AVLNode<Key, Value>* leftChild = parentNode->getLeft();
+      if (leftChild->getBalance() == 1) {
+          // Left-Right Zig-Zag
+          leftRotation(leftChild);
+      }
+      rightRotation(parentNode);
     }
+
+    if (parentNode->getBalance() == 0)
+      break;
+
+    isLeftChild = (parentNode->getParent() != nullptr && parentNode == parentNode->getParent()->getLeft());
+    parentNode = parentNode->getParent();
   }
 }
 
