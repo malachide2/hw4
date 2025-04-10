@@ -618,10 +618,13 @@ BinarySearchTree<Key, Value>::successor(Node<Key, Value>* current) {
 */
 template<typename Key, typename Value>
 void BinarySearchTree<Key, Value>::clear() {
-  // TODO
-  dfs(root_, [](Node<Key, Value>* node){
+  dfs(root_, [](Node<Key, Value>* node) {
+    node->setLeft(nullptr);
+    node->setRight(nullptr);
+    node->setParent(nullptr);
     delete node;
   });
+  root_ = nullptr;
 }
 
 
