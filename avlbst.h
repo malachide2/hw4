@@ -149,70 +149,63 @@ template<class Key, class Value>
 void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
   // TODO
   AVLNode<Key, Value>* currNode = static_cast<AVLNode<Key, Value>*>(this->internalFind(new_item.first));
-    if (currNode == nullptr) {
-        return; // Key not found
+    if (currNode != nullptr) {
+        currNode->setValue(new_item.second); // Overwrite the value if the key exists
+        return;
     }
 
-    AVLNode<Key, Value>* parentNode = currNode->getParent();
-    bool isLeftChild = (parentNode != nullptr && currNode == parentNode->getLeft());
+    // Step 2: Perform a standard BST insert
+    AVLNode<Key, Value>* parentNode = nullptr;
+    currNode = static_cast<AVLNode<Key, Value>*>(this->root_);
 
-    // Case 1: Node has two children
-    if (currNode->getLeft() != nullptr && currNode->getRight() != nullptr) {
-        AVLNode<Key, Value>* pred = static_cast<AVLNode<Key, Value>*>(this->predecessor(currNode));
-        nodeSwap(currNode, pred);
-        parentNode = currNode->getParent();
-        isLeftChild = (parentNode != nullptr && currNode == parentNode->getLeft());
-    }
+    while (currNode != nullptr) {
+        parentNode = currNode;
 
-    // Case 2: Node has one or zero children
-    AVLNode<Key, Value>* child = (currNode->getLeft() != nullptr) ? currNode->getLeft() : currNode->getRight();
-    if (currNode == this->root_) {
-        this->root_ = child; // Update root if necessary
-        if (child != nullptr) {
-            child->setParent(nullptr);
-        }
-    } else {
-        if (isLeftChild) {
-            parentNode->setLeft(child);
+        if (new_item.first < currNode->getKey()) {
+            currNode = currNode->getLeft();
         } else {
-            parentNode->setRight(child);
-        }
-        if (child != nullptr) {
-            child->setParent(parentNode);
+            currNode = currNode->getRight();
         }
     }
 
-    delete currNode;
+    AVLNode<Key, Value>* newNode = new AVLNode<Key, Value>(new_item.first, new_item.second, parentNode);
+    if (parentNode == nullptr) {
+        this->root_ = newNode; // Tree was empty, set root
+    } else if (new_item.first < parentNode->getKey()) {
+        parentNode->setLeft(newNode);
+    } else {
+        parentNode->setRight(newNode);
+    }
 
     // Step 3: Update balances and perform rotations
-    AVLNode<Key, Value>* curr = parentNode;
-    while (curr != nullptr) {
-        if (isLeftChild) {
-            curr->updateBalance(1); // Removing from left increases balance
+    currNode = newNode;
+    while (parentNode != nullptr) {
+        if (currNode == parentNode->getLeft()) {
+            parentNode->updateBalance(-1);
         } else {
-            curr->updateBalance(-1); // Removing from right decreases balance
+            parentNode->updateBalance(1);
         }
 
-        if (curr->getBalance() == 2) {
-            AVLNode<Key, Value>* rightChild = curr->getRight();
-            if (rightChild->getBalance() == -1) {
-                rightRotation(rightChild);
+        if (parentNode->getBalance() == 0) {
+            break; // Tree is balanced
+        } else if (parentNode->getBalance() == -2) {
+            // Left-heavy
+            if (currNode->getBalance() == 1) {
+                leftRotation(currNode);
             }
-            leftRotation(curr);
-        } else if (curr->getBalance() == -2) {
-            AVLNode<Key, Value>* leftChild = curr->getLeft();
-            if (leftChild->getBalance() == 1) {
-                leftRotation(leftChild);
+            rightRotation(parentNode);
+            break;
+        } else if (parentNode->getBalance() == 2) {
+            // Right-heavy
+            if (currNode->getBalance() == -1) {
+                rightRotation(currNode);
             }
-            rightRotation(curr);
+            leftRotation(parentNode);
+            break;
         }
 
-        if (curr->getBalance() != 0) {
-            break; // Stop if balance is restored
-        }
-
-        isLeftChild = (curr->getParent() != nullptr && curr == curr->getParent()->getLeft());
-        curr = curr->getParent();
+        currNode = parentNode;
+        parentNode = parentNode->getParent();
     }
 }
 
