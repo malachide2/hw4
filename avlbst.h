@@ -148,14 +148,14 @@ protected:
 template<class Key, class Value>
 void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
   // TODO
-  Node<Key, Value>* originalNode = internalFind(new_item.first);
+  Node<Key, Value>* originalNode = this->internalFind(new_item.first);
   if (originalNode != nullptr) {
     originalNode->setValue(new_item.second);
     return;
   }
 
   BinarySearchTree<Key, Value>::insert(new_item);
-  Node<Key, Value>* insertedNode = internalFind(new_item.first);
+  Node<Key, Value>* insertedNode = this->internalFind(new_item.first);
   AVLNode<Key, Value>* currNode = static_cast<AVLNode<Key, Value>*>(insertedNode);
   AVLNode<Key, Value>* parentNode = currNode->getParent();
   while (parentNode != nullptr) {
@@ -199,7 +199,7 @@ void AVLTree<Key, Value>::insert(const std::pair<const Key, Value> &new_item) {
 template<class Key, class Value>
 void AVLTree<Key, Value>::remove(const Key& key) {
   // TODO
-  AVLNode<Key, Value>* currNode = static_cast<AVLNode<Key, Value>*>(internalFind(key));
+  AVLNode<Key, Value>* currNode = static_cast<AVLNode<Key, Value>*>(this->internalFind(key));
   if (currNode == nullptr)
     return;
 
